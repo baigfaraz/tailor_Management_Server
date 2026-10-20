@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const customerDetailSchema = mongoose.Schema(
   {
     customer_id: {
-      type: Number, 
+      type: Number,
       unique: true,
       required: true,
     },
@@ -74,7 +74,7 @@ const customerDetailSchema = mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("CustomerDetail", customerDetailSchema);

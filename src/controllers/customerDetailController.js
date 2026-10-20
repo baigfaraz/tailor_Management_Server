@@ -29,7 +29,7 @@ const getSomeDetail = asyncHandler(async (req, res) => {
   try {
     const customers = await CustomerDetail.find(
       {},
-      "customer_id customer_name customer_contact customer_orderStatus customer_paymentStatus"
+      "customer_id customer_name customer_contact customer_orderStatus customer_paymentStatus",
     );
 
     res.status(200).json(customers);
@@ -110,7 +110,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     const updatedCustomer = await CustomerDetail.findOneAndUpdate(
       { customer_id },
       { $set: { customer_orderStatus } },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedCustomer) {
@@ -136,7 +136,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
     const updatedCustomer = await CustomerDetail.findOneAndUpdate(
       { customer_id },
       { $set: { customer_paymentStatus } },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedCustomer) {
