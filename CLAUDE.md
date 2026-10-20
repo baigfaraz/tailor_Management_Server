@@ -34,9 +34,9 @@ Copy `.env.example` to `.env` and set `MONGODB_URI`. Run from the repo root (`do
 - Fields use the `customer_` prefix; `customer_id` is a numeric business ID separate from `_id`
 
 ## Current improvement plan
-- Phase 0: Setup & baseline  ← done (2026-10-20)
-- Phase 1: Audit
-- Phase 2: Stabilize
+- Phase 0: Setup & baseline ✅ (2026-10-20)
+- Phase 1: Audit ✅ (2026-10-20)
+- Phase 2: Stabilize  ← next (starts with safety-net tests)
 - Phase 3: UI foundation (design system)
 - Phase 4: Performance
 - Phase 5: Polish existing features
@@ -44,6 +44,17 @@ Copy `.env.example` to `.env` and set `MONGODB_URI`. Run from the repo root (`do
 - Phase 7: QA & release
 
 Baseline report: `docs/improvement/phase-0/baseline-report.md`. Known issues: `docs/improvement/phase-0/known-issues.md` (server K-1xx; frontend K-0xx in the frontend repo).
+
+Phase 1 audit, backlog and roadmap for both repos live in the frontend repo: `docs/improvement/phase-1/` (pointer in this repo's `docs/improvement/phase-1/README.md`).
+
+## Owner decisions (Phase 1)
+- Runs on the shop PC; tablets connect over the shop Wi-Fi. No login; API protected by a shop PIN per device (SEC-001)
+- Data model may change freely (no real data yet): numeric fields, Customer/Order split, measurement history, due date, advance + balance
+
+## Handle with care
+- `backend/controllers/customerDetailController.js` (all logic, ID race, weak validation)
+- `backend/models/customerDetailModel.js` (schema changes ripple to every screen)
+- `backend/server.js` (CORS `*`, port, no error middleware, LAN exposure)
 
 ## Rules for changes
 - Small, focused changes; one task per branch
