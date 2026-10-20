@@ -91,7 +91,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   const updatedCustomer = await CustomerDetail.findOneAndUpdate(
     { customer_id },
     { $set: { customer_orderStatus } },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   if (!updatedCustomer) {
@@ -111,7 +111,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
   const updatedCustomer = await CustomerDetail.findOneAndUpdate(
     { customer_id },
     { $set: { customer_paymentStatus } },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   if (!updatedCustomer) {
