@@ -32,22 +32,24 @@ const getSomeDetail = asyncHandler(async (req, res) => {
 // @routes POST /api/customerDetail
 //@access public
 const setCustomerDetails = asyncHandler(async (req, res) => {
+  // Express 5 leaves req.body undefined when there is no parsable body.
+  const body = req.body ?? {};
   if (
-    !req.body.customer_name ||
-    !req.body.customer_contact ||
-    !req.body.customer_waist ||
-    !req.body.customer_bust ||
-    !req.body.customer_upperArm ||
-    !req.body.customer_neckToSleeve ||
-    !req.body.customer_back ||
-    !req.body.customer_neckToShoulder ||
-    !req.body.customer_legLength ||
-    !req.body.customer_dressDesign ||
-    !req.body.customer_neckStyle ||
-    !req.body.customer_orderPrice ||
-    !req.body.customer_orderStatus ||
-    !req.body.customer_paymentStatus ||
-    !req.body.customer_noOfSuits
+    !body.customer_name ||
+    !body.customer_contact ||
+    !body.customer_waist ||
+    !body.customer_bust ||
+    !body.customer_upperArm ||
+    !body.customer_neckToSleeve ||
+    !body.customer_back ||
+    !body.customer_neckToShoulder ||
+    !body.customer_legLength ||
+    !body.customer_dressDesign ||
+    !body.customer_neckStyle ||
+    !body.customer_orderPrice ||
+    !body.customer_orderStatus ||
+    !body.customer_paymentStatus ||
+    !body.customer_noOfSuits
   ) {
     res.status(400);
     throw new Error("Please add all details. Thankyou!");
@@ -60,22 +62,22 @@ const setCustomerDetails = asyncHandler(async (req, res) => {
 
   const customerDetails = await CustomerDetail.create({
     customer_id: newCustomerId,
-    customer_name: req.body.customer_name,
-    customer_contact: req.body.customer_contact,
-    customer_waist: req.body.customer_waist + " Inches",
-    customer_bust: req.body.customer_bust + " Inches",
-    customer_upperArm: req.body.customer_upperArm + " Inches",
-    customer_neckToSleeve: req.body.customer_neckToSleeve + " Inches",
-    customer_back: req.body.customer_back + " Inches",
-    customer_neckToShoulder: req.body.customer_neckToShoulder + " Inches",
-    customer_legLength: req.body.customer_legLength + " Inches",
-    customer_upperPocket: req.body.customer_upperPocket,
-    customer_dressDesign: req.body.customer_dressDesign,
-    customer_neckStyle: req.body.customer_neckStyle,
-    customer_orderPrice: req.body.customer_orderPrice + " Rs",
-    customer_orderStatus: req.body.customer_orderStatus,
-    customer_paymentStatus: req.body.customer_paymentStatus,
-    customer_noOfSuits: req.body.customer_noOfSuits,
+    customer_name: body.customer_name,
+    customer_contact: body.customer_contact,
+    customer_waist: body.customer_waist + " Inches",
+    customer_bust: body.customer_bust + " Inches",
+    customer_upperArm: body.customer_upperArm + " Inches",
+    customer_neckToSleeve: body.customer_neckToSleeve + " Inches",
+    customer_back: body.customer_back + " Inches",
+    customer_neckToShoulder: body.customer_neckToShoulder + " Inches",
+    customer_legLength: body.customer_legLength + " Inches",
+    customer_upperPocket: body.customer_upperPocket,
+    customer_dressDesign: body.customer_dressDesign,
+    customer_neckStyle: body.customer_neckStyle,
+    customer_orderPrice: body.customer_orderPrice + " Rs",
+    customer_orderStatus: body.customer_orderStatus,
+    customer_paymentStatus: body.customer_paymentStatus,
+    customer_noOfSuits: body.customer_noOfSuits,
   });
 
   res.status(201).json(customerDetails);
@@ -86,7 +88,7 @@ const setCustomerDetails = asyncHandler(async (req, res) => {
 //@access private
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const customer_id = req.params.customer_id;
-  const { customer_orderStatus } = req.body;
+  const { customer_orderStatus } = req.body ?? {};
 
   const updatedCustomer = await CustomerDetail.findOneAndUpdate(
     { customer_id },
@@ -106,7 +108,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 //@access private
 const updatePaymentStatus = asyncHandler(async (req, res) => {
   const customer_id = req.params.customer_id;
-  const { customer_paymentStatus } = req.body;
+  const { customer_paymentStatus } = req.body ?? {};
 
   const updatedCustomer = await CustomerDetail.findOneAndUpdate(
     { customer_id },

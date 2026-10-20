@@ -52,6 +52,15 @@ describe("POST /api/customerDetail", () => {
     expect(res.body).toEqual({ error: "Please add all details. Thankyou!" });
   });
 
+  it("rejects a request without a JSON body with 400", async () => {
+    const res = await agent
+      .post(API)
+      .set("Content-Type", "text/plain")
+      .send("hello");
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: "Please add all details. Thankyou!" });
+  });
+
   it("current bug (SEC-003): numeric 0 is treated as missing", async () => {
     const res = await agent
       .post(API)
@@ -64,6 +73,18 @@ describe("POST /api/customerDetail", () => {
     delete input.customer_upperPocket;
     const res = await agent.post(API).send(input);
     expect(res.status).toBe(500);
+  });
+});
+
+describe("PUT status without a JSON body", () => {
+  it("does not crash and leaves the status unchanged", async () => {
+    await createCustomer();
+    const res = await agent
+      .put(`${API}/orderStatus/1`)
+      .set("Content-Type", "text/plain")
+      .send("x");
+    expect(res.status).toBe(200);
+    expect(res.body.customer_orderStatus).toBe("Pending");
   });
 });
 
