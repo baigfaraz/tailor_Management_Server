@@ -127,6 +127,32 @@ describe("POST /api/customerDetail", () => {
     },
   );
 
+  it("gives unique, sequential numbers to simultaneous saves (ARCH-007)", async () => {
+    const results = await Promise.all(
+      Array.from({ length: 10 }, (_, i) =>
+        agent.post(API).send(customerInput({ customer_name: `Customer ${i}` })),
+      ),
+    );
+    expect(results.map((r) => r.status)).toEqual(Array(10).fill(201));
+    const ids = results.map((r) => r.body.customer_id).sort((a, b) => a - b);
+    expect(ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it("continues after the highest existing number (ARCH-007)", async () => {
+    const CustomerDetail = require("../src/models/customerDetailModel");
+    await CustomerDetail.collection.insertOne({ customer_id: 41 });
+    const res = await agent.post(API).send(customerInput());
+    expect(res.body.customer_id).toBe(42);
+  });
+
+  it("never reuses the number of a deleted customer (ARCH-007)", async () => {
+    await createCustomer();
+    const second = await createCustomer();
+    await agent.delete(`${API}/delete/${second.customer_id}`);
+    const third = await createCustomer();
+    expect(third.customer_id).toBe(3);
+  });
+
   it("ignores a client-supplied customer_id", async () => {
     const res = await agent.post(API).send(customerInput({ customer_id: 999 }));
     expect(res.status).toBe(201);

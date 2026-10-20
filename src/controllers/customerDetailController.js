@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const CustomerDetail = require("../models/customerDetailModel");
 const { FIELD_LABELS, STATUSES } = CustomerDetail;
+const { nextSequence } = require("../models/counterModel");
 
 // Customer numbers are positive integers; anything else is a bad request.
 function parseCustomerId(res, value) {
@@ -64,10 +65,15 @@ const setCustomerDetails = asyncHandler(async (req, res) => {
   const customer = new CustomerDetail({ ...input, customer_id: 0 });
   await customer.validate();
 
-  const maxCustomerId = await CustomerDetail.findOne()
+  // Atomic counter: simultaneous saves never get the same number (ARCH-007).
+  const highest = await CustomerDetail.findOne()
     .sort("-customer_id")
-    .select("customer_id");
-  customer.customer_id = maxCustomerId ? maxCustomerId.customer_id + 1 : 1;
+    .select("customer_id")
+    .lean();
+  customer.customer_id = await nextSequence(
+    "customer_id",
+    highest ? highest.customer_id : 0,
+  );
   await customer.save();
 
   res.status(201).json(customer);
