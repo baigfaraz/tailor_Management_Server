@@ -8,7 +8,7 @@ REST API for a tailor shop app. It stores customers with measurements, order det
 
 - Node 20 (`.nvmrc`), JavaScript (CommonJS)
 - npm only (`package-lock.json`)
-- Express 4, Mongoose 7, `cors`, `dotenv`, `express-async-handler`; `nodemon` for dev
+- Express 4, Mongoose 7, `cors`, `dotenv`, `express-async-handler`; `node --watch` for dev
 - MongoDB 7 (local dev: Docker `mongo:7`)
 - Dependency versions were reconstructed in Phase 0 because the repo had no `package.json` (K-101)
 
