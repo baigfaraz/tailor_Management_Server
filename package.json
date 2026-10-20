@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "start:e2e": "node scripts/e2e-server.js",
     "backup": "node scripts/backup.js",
-    "restore": "node scripts/restore.js"
+    "restore": "node scripts/restore.js",
+    "migrate:numeric": "node scripts/migrate-numeric.js"
   },
   "dependencies": {
     "cors": "2.8.6",

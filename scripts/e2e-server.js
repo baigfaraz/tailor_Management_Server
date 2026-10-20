@@ -44,9 +44,12 @@ async function main() {
         return res.end(JSON.stringify({ e2e: true }));
       }
       if (req.method === "POST" && req.url === "/reset") {
-        const { collections } = mongoose.connection;
+        const { db } = mongoose.connection;
+        const names = await db
+          .listCollections({}, { nameOnly: true })
+          .toArray();
         await Promise.all(
-          Object.values(collections).map((c) => c.deleteMany({})),
+          names.map(({ name }) => db.collection(name).deleteMany({})),
         );
         res.writeHead(204);
         return res.end();

@@ -1,11 +1,29 @@
 const asyncHandler = require("express-async-handler");
 const CustomerDetail = require("../models/customerDetailModel");
+const { FIELD_LABELS, STATUSES } = CustomerDetail;
+
+// Customer numbers are positive integers; anything else is a bad request.
+function parseCustomerId(res, value) {
+  const id = Number(value);
+  if (!Number.isInteger(id) || id < 1) {
+    res.status(400);
+    throw new Error("Invalid customer number.");
+  }
+  return id;
+}
+
+function requireStatus(res, value, label) {
+  if (!STATUSES.includes(value)) {
+    res.status(400);
+    throw new Error(`${label} must be ${STATUSES.join(" or ")}`);
+  }
+}
 
 // @desc get customer Detail by id
 // @routes GET /api/customerDetail/:customer_id
 //@access private
 const getDetailById = asyncHandler(async (req, res) => {
-  const customer_id = req.params.customer_id;
+  const customer_id = parseCustomerId(res, req.params.customer_id);
 
   const customer = await CustomerDetail.findOne({ customer_id });
 
@@ -28,67 +46,40 @@ const getSomeDetail = asyncHandler(async (req, res) => {
   res.status(200).json(customers);
 });
 
+// Fields a client may set when creating a customer (others are ignored).
+const CREATE_FIELDS = Object.keys(FIELD_LABELS);
+
 // @desc set customerDetail
 // @routes POST /api/customerDetail
 //@access public
 const setCustomerDetails = asyncHandler(async (req, res) => {
   // Express 5 leaves req.body undefined when there is no parsable body.
   const body = req.body ?? {};
-  if (
-    !body.customer_name ||
-    !body.customer_contact ||
-    !body.customer_waist ||
-    !body.customer_bust ||
-    !body.customer_upperArm ||
-    !body.customer_neckToSleeve ||
-    !body.customer_back ||
-    !body.customer_neckToShoulder ||
-    !body.customer_legLength ||
-    !body.customer_dressDesign ||
-    !body.customer_neckStyle ||
-    !body.customer_orderPrice ||
-    !body.customer_orderStatus ||
-    !body.customer_paymentStatus ||
-    !body.customer_noOfSuits
-  ) {
-    res.status(400);
-    throw new Error("Please add all details. Thankyou!");
+  const input = {};
+  for (const field of CREATE_FIELDS) {
+    if (body[field] !== undefined) input[field] = body[field];
   }
+
+  // Validate before taking a customer number; the schema reports every bad field.
+  const customer = new CustomerDetail({ ...input, customer_id: 0 });
+  await customer.validate();
 
   const maxCustomerId = await CustomerDetail.findOne()
     .sort("-customer_id")
     .select("customer_id");
-  const newCustomerId = maxCustomerId ? maxCustomerId.customer_id + 1 : 1;
+  customer.customer_id = maxCustomerId ? maxCustomerId.customer_id + 1 : 1;
+  await customer.save();
 
-  const customerDetails = await CustomerDetail.create({
-    customer_id: newCustomerId,
-    customer_name: body.customer_name,
-    customer_contact: body.customer_contact,
-    customer_waist: body.customer_waist + " Inches",
-    customer_bust: body.customer_bust + " Inches",
-    customer_upperArm: body.customer_upperArm + " Inches",
-    customer_neckToSleeve: body.customer_neckToSleeve + " Inches",
-    customer_back: body.customer_back + " Inches",
-    customer_neckToShoulder: body.customer_neckToShoulder + " Inches",
-    customer_legLength: body.customer_legLength + " Inches",
-    customer_upperPocket: body.customer_upperPocket,
-    customer_dressDesign: body.customer_dressDesign,
-    customer_neckStyle: body.customer_neckStyle,
-    customer_orderPrice: body.customer_orderPrice + " Rs",
-    customer_orderStatus: body.customer_orderStatus,
-    customer_paymentStatus: body.customer_paymentStatus,
-    customer_noOfSuits: body.customer_noOfSuits,
-  });
-
-  res.status(201).json(customerDetails);
+  res.status(201).json(customer);
 });
 
 // @desc update customer_orderStatus
 // @routes PUT /api/customerDetail/orderStatus/:customer_id
 //@access private
 const updateOrderStatus = asyncHandler(async (req, res) => {
-  const customer_id = req.params.customer_id;
+  const customer_id = parseCustomerId(res, req.params.customer_id);
   const { customer_orderStatus } = req.body ?? {};
+  requireStatus(res, customer_orderStatus, "Order status");
 
   const updatedCustomer = await CustomerDetail.findOneAndUpdate(
     { customer_id },
@@ -107,8 +98,9 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 // @routes PUT /api/customerDetail/paymentStatus/:customer_id
 //@access private
 const updatePaymentStatus = asyncHandler(async (req, res) => {
-  const customer_id = req.params.customer_id;
+  const customer_id = parseCustomerId(res, req.params.customer_id);
   const { customer_paymentStatus } = req.body ?? {};
+  requireStatus(res, customer_paymentStatus, "Payment status");
 
   const updatedCustomer = await CustomerDetail.findOneAndUpdate(
     { customer_id },
@@ -127,7 +119,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
 // @routes Delete /api/customerDetail/delete/:customer_id
 //@access private
 const deleteCustomer = asyncHandler(async (req, res) => {
-  const customer_id = req.params.customer_id;
+  const customer_id = parseCustomerId(res, req.params.customer_id);
 
   const customer = await CustomerDetail.findOne({ customer_id });
 

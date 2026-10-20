@@ -17,9 +17,15 @@ export async function startDb() {
   await mongoose.connect(uri);
 }
 
+// Empties every collection, including ones written without a Mongoose model.
 export async function clearDb() {
-  const { collections } = mongoose.connection;
-  await Promise.all(Object.values(collections).map((c) => c.deleteMany({})));
+  const { db } = mongoose.connection;
+  const collections = await db
+    .listCollections({}, { nameOnly: true })
+    .toArray();
+  await Promise.all(
+    collections.map(({ name }) => db.collection(name).deleteMany({})),
+  );
 }
 
 export async function stopDb() {
