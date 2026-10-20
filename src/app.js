@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const express = require("express");
 const cors = require("cors");
 const { createDeviceAuth } = require("./middleware/deviceAuth");
+const { apiNotFound, errorHandler } = require("./middleware/errors");
 
 // Options:
 // - shopPin, sessionSecret: required; protect the API with a per-device PIN (SEC-001).
@@ -28,6 +29,7 @@ function createApp({ shopPin, sessionSecret, corsOrigins = [], webDist } = {}) {
     deviceAuth.requireDevice,
     require("./routes/customerDetailRoute"),
   );
+  app.use("/api", apiNotFound);
 
   const dist = webDist && path.resolve(webDist);
   if (dist && fs.existsSync(path.join(dist, "index.html"))) {
@@ -36,6 +38,8 @@ function createApp({ shopPin, sessionSecret, corsOrigins = [], webDist } = {}) {
       res.sendFile(path.join(dist, "index.html"));
     });
   }
+
+  app.use(errorHandler);
 
   return app;
 }

@@ -10,6 +10,10 @@ module.exports = [
       sourceType: "commonjs",
       globals: { ...globals.node },
     },
+    rules: {
+      // `_`-prefixed args are required by a signature but unused (e.g. Express error handlers).
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
   },
   {
     files: ["test/**/*.js", "**/*.mjs"],

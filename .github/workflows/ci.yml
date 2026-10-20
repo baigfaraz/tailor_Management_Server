@@ -15,10 +15,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - name: Lint
-        # Non-blocking until the swallowed-error catches are fixed in SEC-002 (Phase 2, step 6 makes it blocking).
-        continue-on-error: true
-        run: npm run lint
+      - run: npm run lint
       - run: npm run format:check
       - name: API tests (in-memory MongoDB)
         run: npm test

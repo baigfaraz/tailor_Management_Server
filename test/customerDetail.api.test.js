@@ -49,8 +49,7 @@ describe("POST /api/customerDetail", () => {
   it("rejects a request with missing fields with 400", async () => {
     const res = await agent.post(API).send({});
     expect(res.status).toBe(400);
-    // current bug (SEC-002): body is Express's HTML error page, not JSON
-    expect(res.text).toContain("Please add all details");
+    expect(res.body).toEqual({ error: "Please add all details. Thankyou!" });
   });
 
   it("current bug (SEC-003): numeric 0 is treated as missing", async () => {
@@ -112,6 +111,11 @@ describe("GET /api/customerDetail/:customer_id", () => {
   it("current bug (SEC-003): non-numeric id gives 500", async () => {
     const res = await agent.get(`${API}/abc`);
     expect(res.status).toBe(500);
+    // SEC-002: generic JSON, no stack trace or file paths
+    expect(res.body).toEqual({
+      error: "An error occurred while processing your request.",
+    });
+    expect(res.text).not.toMatch(/at |\.js:/);
   });
 });
 
@@ -170,5 +174,13 @@ describe("cross-origin access (SEC-001)", () => {
       .get(`${API}/somedata`)
       .set("Origin", "http://evil.example");
     expect(res.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+});
+
+describe("API errors (SEC-002)", () => {
+  it("answers unknown API paths with JSON 404", async () => {
+    const res = await agent.get("/api/does-not-exist");
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: "Not found." });
   });
 });
