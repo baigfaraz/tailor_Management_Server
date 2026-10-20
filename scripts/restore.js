@@ -1,7 +1,7 @@
 // Usage: npm run restore -- <backup-folder> --yes [--uri <mongodb-uri>]
 // Replaces the collections in the target database with the backup's contents.
 // Target defaults to MONGODB_URI. Without --yes it only prints what it would do.
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("mongoose");

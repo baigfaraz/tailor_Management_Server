@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const { readEnv } = require("./config/env");
 const connectDB = require("./config/db");
 const { createApp } = require("./app");

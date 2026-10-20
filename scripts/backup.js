@@ -2,7 +2,7 @@
 // Writes a backup of the database in MONGODB_URI to BACKUP_DIR (default ./backups),
 // keeping the newest BACKUP_KEEP (default 30). Point BACKUP_DIR at a second disk,
 // USB stick or synced cloud folder so a lost PC does not lose the data.
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const path = require("node:path");
 const mongoose = require("mongoose");
 const { backupDatabase } = require("../src/backup/backup");
