@@ -8,7 +8,8 @@ import { clearDb, startDb, stopDb } from "./helpers/db.js";
 import { customerInput } from "./helpers/fixtures.js";
 
 const require = createRequire(import.meta.url);
-const app = require("../src/app");
+const { createApp } = require("../src/app");
+const app = createApp();
 
 const API = "/api/customerDetail";
 

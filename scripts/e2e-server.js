@@ -20,7 +20,8 @@ async function main() {
     throw new Error(`E2E server connected to ${mongoose.connection.host}`);
   }
 
-  const app = require("../src/app");
+  const { createApp } = require("../src/app");
+  const app = createApp({ webDist: process.env.WEB_DIST });
   const port = Number(process.env.PORT || 5000);
   const controlPort = Number(process.env.E2E_CONTROL_PORT || 5055);
 
