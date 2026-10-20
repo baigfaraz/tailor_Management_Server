@@ -291,7 +291,6 @@ describe("API errors (SEC-002)", () => {
       .mockRejectedValueOnce(
         new Error("database exploded at /secret/path.js:1"),
       );
-    const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = await agent.get(`${API}/somedata`);
 
@@ -301,7 +300,6 @@ describe("API errors (SEC-002)", () => {
     });
     expect(res.text).not.toMatch(/secret|\.js:/);
     spy.mockRestore();
-    quiet.mockRestore();
   });
 
   it("answers unknown API paths with JSON 404", async () => {

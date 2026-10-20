@@ -25,6 +25,8 @@ function readEnv(env = process.env) {
       .map((origin) => origin.trim())
       .filter(Boolean),
     webDist: env.WEB_DIST,
+    logDir: env.LOG_DIR || "logs",
+    logRetentionDays: Number(env.LOG_RETENTION_DAYS || 14),
   };
 }
 

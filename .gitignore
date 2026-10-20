@@ -20,3 +20,6 @@ dist/
 
 # backups (may contain customer data)
 backups/
+
+# request/error logs
+logs/

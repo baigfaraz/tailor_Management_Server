@@ -32,17 +32,22 @@ function validationResponse(err) {
 }
 
 // Express recognises error handlers by their four arguments.
-function errorHandler(err, req, res, _next) {
+const createErrorHandler = (logger) => (err, req, res, _next) => {
   if (err instanceof mongoose.Error.ValidationError) {
     return res.status(400).json(validationResponse(err));
   }
   const status =
     res.statusCode >= 400 && res.statusCode < 500 ? res.statusCode : 500;
   if (status === 500) {
-    console.error(`${req.method} ${req.originalUrl} failed:`, err);
+    logger.error("unhandled_error", {
+      method: req.method,
+      path: req.originalUrl.split("?")[0],
+      message: err.message,
+      stack: err.stack,
+    });
     return res.status(500).json({ error: GENERIC_MESSAGE });
   }
   res.status(status).json({ error: err.message });
-}
+};
 
-module.exports = { apiNotFound, errorHandler, GENERIC_MESSAGE };
+module.exports = { apiNotFound, createErrorHandler, GENERIC_MESSAGE };
