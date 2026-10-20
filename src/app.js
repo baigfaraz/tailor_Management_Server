@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const { createDeviceAuth } = require("./middleware/deviceAuth");
 const { apiNotFound, errorHandler } = require("./middleware/errors");
+const { securityHeaders } = require("./middleware/securityHeaders");
 
 // Options:
 // - shopPin, sessionSecret: required; protect the API with a per-device PIN (SEC-001).
@@ -17,6 +18,8 @@ function createApp({ shopPin, sessionSecret, corsOrigins = [], webDist } = {}) {
     throw new Error("createApp needs shopPin and sessionSecret");
   }
   const app = express();
+  app.disable("x-powered-by");
+  app.use(securityHeaders);
   const deviceAuth = createDeviceAuth({ shopPin, sessionSecret });
 
   app.use(cors({ origin: corsOrigins, credentials: true }));
