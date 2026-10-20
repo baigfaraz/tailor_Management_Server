@@ -57,6 +57,16 @@ describe("with webDist", () => {
   });
 });
 
+describe("compression", () => {
+  it("compresses the web app's assets when the browser accepts gzip", async () => {
+    fs.writeFileSync(path.join(dist, "static", "big.js"), "x".repeat(20000));
+    const res = await request(createApp({ webDist: dist }))
+      .get("/static/big.js")
+      .set("Accept-Encoding", "gzip");
+    expect(res.headers["content-encoding"]).toBe("gzip");
+  });
+});
+
 describe("without webDist", () => {
   it("does not serve a frontend", async () => {
     const res = await request(createApp()).get("/");

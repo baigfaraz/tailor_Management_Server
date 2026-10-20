@@ -21,6 +21,7 @@
     "migrate:numeric": "node scripts/migrate-numeric.js"
   },
   "dependencies": {
+    "compression": "1.8.2",
     "cors": "2.8.6",
     "dotenv": "18.0.8",
     "express": "5.3.0",

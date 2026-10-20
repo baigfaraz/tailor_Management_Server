@@ -2,6 +2,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const { createDeviceAuth } = require("./middleware/deviceAuth");
 const { apiNotFound, createErrorHandler } = require("./middleware/errors");
 const { requestLogger, silentLogger } = require("./logger");
@@ -28,6 +29,8 @@ function createApp({
   const app = express();
   app.disable("x-powered-by");
   app.use(securityHeaders);
+  // gzip/brotli for JSON and the web app's JS/CSS (several hundred KB raw).
+  app.use(compression());
   app.use(requestLogger(logger));
   const deviceAuth = createDeviceAuth({ shopPin, sessionSecret });
 
