@@ -15,7 +15,9 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "start:e2e": "node scripts/e2e-server.js"
+    "start:e2e": "node scripts/e2e-server.js",
+    "backup": "node scripts/backup.js",
+    "restore": "node scripts/restore.js"
   },
   "dependencies": {
     "cors": "2.8.5",
