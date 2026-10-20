@@ -12,7 +12,7 @@ module.exports = [
     },
   },
   {
-    files: ["**/*.test.js", "test/**/*.js"],
+    files: ["test/**/*.js", "**/*.mjs"],
     languageOptions: { sourceType: "module", globals: { ...globals.node } },
   },
 ];
