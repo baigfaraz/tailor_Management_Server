@@ -20,11 +20,11 @@ REST API for a tailor shop app. It stores customers with measurements, order det
 Copy `.env.example` to `.env` and set `MONGODB_URI`. Run from the repo root (`dotenv` reads `.env` from the current directory). On macOS, turn off AirPlay Receiver to free port 5000; the frontend hardcodes it.
 
 ## Structure
-- `backend/server.js`: Express app, CORS, JSON body parsing, mounts `/api/customerDetail`
-- `backend/config/db.js`: Mongoose connection (loads `dotenv`)
-- `backend/models/customerDetailModel.js`: `CustomerDetail` schema
-- `backend/controllers/customerDetailController.js`: 6 handlers
-- `backend/routes/customerDetailRoute.js`: route table
+- `src/server.js`: Express app, CORS, JSON body parsing, mounts `/api/customerDetail`
+- `src/config/db.js`: Mongoose connection (loads `dotenv`)
+- `src/models/customerDetailModel.js`: `CustomerDetail` schema
+- `src/controllers/customerDetailController.js`: 6 handlers
+- `src/routes/customerDetailRoute.js`: route table
 - `docs/improvement/`: improvement-plan reports
 
 ## Conventions
@@ -52,9 +52,9 @@ Phase 1 audit, backlog and roadmap for both repos live in the frontend repo: `do
 - Data model may change freely (no real data yet): numeric fields, Customer/Order split, measurement history, due date, advance + balance
 
 ## Handle with care
-- `backend/controllers/customerDetailController.js` (all logic, ID race, weak validation)
-- `backend/models/customerDetailModel.js` (schema changes ripple to every screen)
-- `backend/server.js` (CORS `*`, port, no error middleware, LAN exposure)
+- `src/controllers/customerDetailController.js` (all logic, ID race, weak validation)
+- `src/models/customerDetailModel.js` (schema changes ripple to every screen)
+- `src/server.js` (CORS `*`, port, no error middleware, LAN exposure)
 
 ## Rules for changes
 - Small, focused changes; one task per branch

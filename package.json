@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "Express + MongoDB API for Tailor Management System",
-  "main": "backend/server.js",
+  "main": "src/server.js",
   "engines": {
     "node": ">=20 <21"
   },
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "cors": "2.8.5",
