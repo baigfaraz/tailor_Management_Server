@@ -9,16 +9,25 @@ import { customerInput } from "./helpers/fixtures.js";
 
 const require = createRequire(import.meta.url);
 const { createApp } = require("../src/app");
-const app = createApp();
+const app = createApp({
+  shopPin: "2468",
+  sessionSecret: "test-secret-test-secret-test-secret",
+});
 
 const API = "/api/customerDetail";
 
-beforeAll(startDb);
+let agent;
+
+beforeAll(async () => {
+  await startDb();
+  agent = request.agent(app);
+  await agent.post("/api/session").send({ pin: "2468" }).expect(200);
+});
 afterAll(stopDb);
 beforeEach(clearDb);
 
 async function createCustomer(overrides) {
-  const res = await request(app).post(API).send(customerInput(overrides));
+  const res = await agent.post(API).send(customerInput(overrides));
   expect(res.status).toBe(201);
   return res.body;
 }
@@ -38,14 +47,14 @@ describe("POST /api/customerDetail", () => {
   });
 
   it("rejects a request with missing fields with 400", async () => {
-    const res = await request(app).post(API).send({});
+    const res = await agent.post(API).send({});
     expect(res.status).toBe(400);
     // current bug (SEC-002): body is Express's HTML error page, not JSON
     expect(res.text).toContain("Please add all details");
   });
 
   it("current bug (SEC-003): numeric 0 is treated as missing", async () => {
-    const res = await request(app)
+    const res = await agent
       .post(API)
       .send(customerInput({ customer_waist: 0 }));
     expect(res.status).toBe(400);
@@ -54,7 +63,7 @@ describe("POST /api/customerDetail", () => {
   it("current bug (SEC-003): missing customer_upperPocket gives 500, not 400", async () => {
     const input = customerInput();
     delete input.customer_upperPocket;
-    const res = await request(app).post(API).send(input);
+    const res = await agent.post(API).send(input);
     expect(res.status).toBe(500);
   });
 });
@@ -62,7 +71,7 @@ describe("POST /api/customerDetail", () => {
 describe("GET /api/customerDetail/somedata", () => {
   it("returns the list projection only", async () => {
     await createCustomer();
-    const res = await request(app).get(`${API}/somedata`);
+    const res = await agent.get(`${API}/somedata`);
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
@@ -79,7 +88,7 @@ describe("GET /api/customerDetail/somedata", () => {
   });
 
   it("returns an empty array when there are no customers", async () => {
-    const res = await request(app).get(`${API}/somedata`);
+    const res = await agent.get(`${API}/somedata`);
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
@@ -88,20 +97,20 @@ describe("GET /api/customerDetail/somedata", () => {
 describe("GET /api/customerDetail/:customer_id", () => {
   it("returns the full customer", async () => {
     await createCustomer();
-    const res = await request(app).get(`${API}/1`);
+    const res = await agent.get(`${API}/1`);
     expect(res.status).toBe(200);
     expect(res.body.customer_name).toBe("Ali Raza");
     expect(res.body.customer_bust).toBe("38 Inches");
   });
 
   it("returns 404 for an unknown id", async () => {
-    const res = await request(app).get(`${API}/999`);
+    const res = await agent.get(`${API}/999`);
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: "Customer not found." });
   });
 
   it("current bug (SEC-003): non-numeric id gives 500", async () => {
-    const res = await request(app).get(`${API}/abc`);
+    const res = await agent.get(`${API}/abc`);
     expect(res.status).toBe(500);
   });
 });
@@ -112,18 +121,18 @@ describe.each([
 ])("PUT /api/customerDetail/%s/:customer_id", (path, field) => {
   it("updates the status", async () => {
     await createCustomer();
-    const res = await request(app)
+    const res = await agent
       .put(`${API}/${path}/1`)
       .send({ [field]: "Complete" });
 
     expect(res.status).toBe(200);
     expect(res.body[field]).toBe("Complete");
-    const stored = await request(app).get(`${API}/1`);
+    const stored = await agent.get(`${API}/1`);
     expect(stored.body[field]).toBe("Complete");
   });
 
   it("returns 404 for an unknown id", async () => {
-    const res = await request(app)
+    const res = await agent
       .put(`${API}/${path}/999`)
       .send({ [field]: "Complete" });
     expect(res.status).toBe(404);
@@ -131,7 +140,7 @@ describe.each([
 
   it("current bug (SEC-003): accepts any status string", async () => {
     await createCustomer();
-    const res = await request(app)
+    const res = await agent
       .put(`${API}/${path}/1`)
       .send({ [field]: "anything" });
     expect(res.status).toBe(200);
@@ -142,24 +151,24 @@ describe.each([
 describe("DELETE /api/customerDetail/delete/:customer_id", () => {
   it("deletes the customer", async () => {
     await createCustomer();
-    const res = await request(app).delete(`${API}/delete/1`);
+    const res = await agent.delete(`${API}/delete/1`);
 
     expect(res.status).toBe(200);
     expect(res.body.deletedCount).toBe(1);
-    expect((await request(app).get(`${API}/1`)).status).toBe(404);
+    expect((await agent.get(`${API}/1`)).status).toBe(404);
   });
 
   it("returns 404 for an unknown id", async () => {
-    const res = await request(app).delete(`${API}/delete/999`);
+    const res = await agent.delete(`${API}/delete/999`);
     expect(res.status).toBe(404);
   });
 });
 
-describe("cross-origin access", () => {
-  it("current behavior (SEC-001): allows every origin", async () => {
-    const res = await request(app)
+describe("cross-origin access (SEC-001)", () => {
+  it("does not allow other origins by default", async () => {
+    const res = await agent
       .get(`${API}/somedata`)
       .set("Origin", "http://evil.example");
-    expect(res.headers["access-control-allow-origin"]).toBe("*");
+    expect(res.headers["access-control-allow-origin"]).toBeUndefined();
   });
 });

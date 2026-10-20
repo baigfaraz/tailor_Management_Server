@@ -7,7 +7,14 @@ import path from "node:path";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { createApp } = require("../src/app");
+const { createApp: createAppWithOptions } = require("../src/app");
+
+const createApp = (options = {}) =>
+  createAppWithOptions({
+    shopPin: "2468",
+    sessionSecret: "test-secret-test-secret-test-secret",
+    ...options,
+  });
 
 let dist;
 

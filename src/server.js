@@ -1,12 +1,22 @@
+require("dotenv").config();
+const { readEnv } = require("./config/env");
 const connectDB = require("./config/db");
 const { createApp } = require("./app");
 
-const port = process.env.PORT || 5000;
+let config;
+try {
+  config = readEnv();
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
 
 connectDB();
 
-const app = createApp({ webDist: process.env.WEB_DIST });
+const app = createApp(config);
 
-app.listen(port, () => console.log(`Server started at Port ${port}.`));
+app.listen(config.port, () =>
+  console.log(`Server started at Port ${config.port}.`),
+);
 
 module.exports = app;

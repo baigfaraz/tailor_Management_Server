@@ -1,7 +1,11 @@
 // API server for end-to-end tests. Uses an in-memory MongoDB and never connects
-// to Atlas or any real database. Also exposes test-only control endpoints on
+// to Atlas or any real database. It never reads .env: the PIN and ports are
+// fixed test values (E2E_PORT, E2E_CONTROL_PORT can override the ports). Also exposes test-only control endpoints on
 // E2E_CONTROL_PORT (POST /reset empties the database, GET /health identifies it).
 const http = require("node:http");
+const crypto = require("node:crypto");
+
+const E2E_SHOP_PIN = "2468";
 const { MongoMemoryServer } = require("mongodb-memory-server");
 
 async function main() {
@@ -10,7 +14,7 @@ async function main() {
   if (!uri.startsWith("mongodb://127.0.0.1")) {
     throw new Error(`Refusing to start E2E server against ${uri}`);
   }
-  // Set before src/config/db.js loads dotenv; dotenv never overrides existing vars.
+  // Connect only to the in-memory database (this script never loads .env).
   process.env.MONGODB_URI = uri;
 
   const mongoose = require("mongoose");
@@ -21,8 +25,12 @@ async function main() {
   }
 
   const { createApp } = require("../src/app");
-  const app = createApp({ webDist: process.env.WEB_DIST });
-  const port = Number(process.env.PORT || 5000);
+  const app = createApp({
+    shopPin: E2E_SHOP_PIN,
+    sessionSecret: crypto.randomBytes(32).toString("hex"),
+    webDist: process.env.WEB_DIST,
+  });
+  const port = Number(process.env.E2E_PORT || 5100);
   const controlPort = Number(process.env.E2E_CONTROL_PORT || 5055);
 
   app.listen(port, () =>
